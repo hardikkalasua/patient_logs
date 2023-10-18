@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:patient_logs/data/models.dart';
 import 'package:patient_logs/data/repository.dart';
 
 class PatientPhotosComponent extends StatefulWidget {
-  const PatientPhotosComponent({super.key});
+  final int patientId;
+  const PatientPhotosComponent({super.key, required this.patientId});
 
   @override
   State<PatientPhotosComponent> createState() => _PatientPhotosComponentState();
@@ -15,7 +18,7 @@ class _PatientPhotosComponentState extends State<PatientPhotosComponent> {
   @override
   void initState() {
     super.initState();
-    images = Repository.getCaseImages(1);
+    images = Repository.getCaseImages(widget.patientId);
   }
 
   @override
@@ -29,7 +32,10 @@ class _PatientPhotosComponentState extends State<PatientPhotosComponent> {
                 crossAxisCount: 3),
             itemCount: snapshot.data!.length,
             itemBuilder: (BuildContext context, int index) {
-              return Image.network(snapshot.data![index].uri);
+              return Image.file(
+                File(snapshot.data![index].uri),
+                fit: BoxFit.cover,
+              );
             },
           );
         } else if (snapshot.hasError) {
