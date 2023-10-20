@@ -22,12 +22,39 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.patient.name),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.more_vert),
+            onPressed: () {},
+          ),
+        ],
       ),
       body: Column(
         children: [
-          Text('Name : ${widget.patient.name}'),
-          Text('Contact : ${widget.patient.contact}'),
-          Text('Created At : ${widget.patient.createdAt}'),
+          ListTile(
+            leading: Container(
+              width: 60,
+              height: 60,
+              child: CircleAvatar(
+                backgroundImage: AssetImage(
+                  'assets/images/default_avatar.jpg',
+                ),
+              ),
+            ),
+            title: Text(widget.patient.name),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("${widget.patient.sex}, ${widget.patient.age}"),
+                Text(widget.patient.contact.toString()),
+              ],
+            ),
+            trailing: IconButton(
+              icon: Icon(Icons.edit),
+              onPressed: () {},
+            ),
+            isThreeLine: true,
+          ),
           Text('Complaint : ${widget.patient.complaint}'),
           Text('Notes : ${widget.patient.notes}'),
           Expanded(

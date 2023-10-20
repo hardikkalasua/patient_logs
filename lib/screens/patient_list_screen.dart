@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:patient_logs/components/avatar_widget.dart';
 import 'package:patient_logs/data/repository.dart';
 import 'package:patient_logs/screens/patient_detail_screen.dart';
 import 'dart:async';
@@ -40,18 +43,26 @@ class _PatientListScreenState extends State<PatientListScreen> {
                 return ListView.builder(
                   itemCount: snapshot.data!.length,
                   itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(snapshot.data![index].name),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PatientDetailScreen(
-                              patient: snapshot.data![index],
+                    return Card(
+                      child: ListTile(
+                        leading: AvatarWidget(
+                          radius: 28,
+                          avatar: File(snapshot.data![index].avatar),
+                        ),
+                        title: Text(snapshot.data![index].name),
+                        subtitle: Text(snapshot.data![index].complaint),
+                        trailing: Icon(Icons.arrow_right),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PatientDetailScreen(
+                                patient: snapshot.data![index],
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     );
                   },
                 );
@@ -70,7 +81,8 @@ class _PatientListScreenState extends State<PatientListScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => const CreatePatientScreen()),
+              builder: (context) => const CreatePatientScreen(),
+            ),
           );
         },
         child: const Icon(Icons.add),
