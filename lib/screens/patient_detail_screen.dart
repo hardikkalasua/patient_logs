@@ -20,89 +20,76 @@ class PatientDetailScreen extends StatefulWidget {
 class _PatientDetailScreenState extends State<PatientDetailScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.patient.name),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.more_vert),
-            onPressed: () {},
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: ListTile(
+            leading: AvatarWidget(
+              radius: 48.0,
+              path: widget.patient.avatar,
+            ),
+            title: Text(widget.patient.name),
+            subtitle: Text(widget.patient.contact),
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AvatarWidget(
-                    radius: 48.0,
-                    path: widget.patient.avatar,
-                  ),
-                  Flexible(
-                    child: ListTile(
-                      title: Text(widget.patient.name),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.man,
-                                color: Colors.blue,
-                              ),
-                              Text(widget.patient.age.toString()),
-                            ],
-                          ),
-                          Text(widget.patient.contact.toString()),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+          actions: [
+            IconButton(
+              icon: Icon(Icons.more_vert),
+              onPressed: () {},
+            ),
+          ],
+          bottom: const TabBar(
+            tabs: [
+              Tab(icon: Icon(Icons.photo_album)),
+              Tab(icon: Icon(Icons.notes)),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            Expanded(
+              child: PatientPhotosComponent(
+                patientId: widget.patient.id,
               ),
             ),
-          ),
-          Expanded(
-            child: PatientPhotosComponent(
-              patientId: widget.patient.id,
+            Expanded(
+              child: PatientPhotosComponent(
+                patientId: widget.patient.id,
+              ),
             ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          File? image;
-          final pickedImage =
-              await ImagePicker().pickImage(source: ImageSource.gallery);
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            File? image;
+            final pickedImage =
+                await ImagePicker().pickImage(source: ImageSource.gallery);
 
-          if (pickedImage != null) {
-            image = File(pickedImage.path);
-            final directory = await getApplicationDocumentsDirectory();
-            final patientDirectory =
-                Directory('${directory.path}/patient_${widget.patient.id}');
-            if (!await patientDirectory.exists()) {
-              await patientDirectory.create();
+            if (pickedImage != null) {
+              image = File(pickedImage.path);
+              final directory = await getApplicationDocumentsDirectory();
+              final patientDirectory =
+                  Directory('${directory.path}/patient_${widget.patient.id}');
+              if (!await patientDirectory.exists()) {
+                await patientDirectory.create();
+              }
+              final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+              final filePath = '${patientDirectory.path}/$fileName';
+              final file = File(filePath);
+              await file.writeAsBytes(await image.readAsBytes());
+              Repository.addCaseImage(CaseImage(
+                id: 0,
+                title: 'Placeholder Title',
+                uri: file.path,
+                description: '',
+                notes: '',
+                patientId: widget.patient.id,
+                createdAt: DateTime.now(),
+              ));
             }
-            final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
-            final filePath = '${patientDirectory.path}/$fileName';
-            final file = File(filePath);
-            await file.writeAsBytes(await image.readAsBytes());
-            Repository.addCaseImage(CaseImage(
-              id: 0,
-              title: 'Placeholder Title',
-              uri: file.path,
-              description: '',
-              notes: '',
-              patientId: widget.patient.id,
-              createdAt: DateTime.now(),
-            ));
-          }
-        },
-        child: Icon(Icons.add),
+          },
+          child: Icon(Icons.add),
+        ),
       ),
     );
   }
