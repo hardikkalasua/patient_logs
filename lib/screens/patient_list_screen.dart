@@ -2,10 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:patient_logs/components/avatar_widget.dart';
+import 'package:patient_logs/data/provider_models.dart';
 import 'package:patient_logs/data/repository.dart';
 import 'package:patient_logs/screens/patient_detail_screen.dart';
 import 'dart:async';
 import 'package:patient_logs/data/models.dart';
+import 'package:provider/provider.dart';
 
 import 'create_patient_screen.dart';
 
@@ -15,65 +17,74 @@ class PatientListScreen extends StatefulWidget {
 }
 
 class _PatientListScreenState extends State<PatientListScreen> {
-  late Future<List<Patient>> futurePatients;
-
-  @override
-  void initState() {
-    super.initState();
-    futurePatients = Repository.getPatients();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Patient List'),
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          setState(() {
-            futurePatients = Repository.getPatients();
-          });
-        },
-        child: Center(
-          child: FutureBuilder<List<Patient>>(
-            future: futurePatients,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, index) {
-                    return Card(
-                      child: ListTile(
-                        leading: AvatarWidget(
-                          radius: 28,
-                          avatar: File(snapshot.data![index].avatar),
-                        ),
-                        title: Text(snapshot.data![index].name),
-                        subtitle: Text(snapshot.data![index].complaint),
-                        trailing: Icon(Icons.arrow_right),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PatientDetailScreen(
-                                patient: snapshot.data![index],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                );
-              } else if (snapshot.hasError) {
-                return Text('${snapshot.error}');
-              }
-
-              // By default, show a loading spinner.
-              return const CircularProgressIndicator();
-            },
+        title: const Text('MedLog'),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.search),
           ),
+          PopupMenuButton(
+            child: const Icon(Icons.sort),
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem<String>(
+                value: 'All',
+                child: Text('Most Recent'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'All',
+                child: Text('Oldest First'),
+              ),
+            ],
+          ),
+        ],
+      ),
+      body: Center(
+        child: Consumer<PatientListModel>(
+          builder: (context, patientList, child) {
+            return FutureBuilder<List<Patient>>(
+                future: patientList.getPatients(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return ListView.builder(
+                      itemCount: patientList.patients.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          child: ListTile(
+                            leading: AvatarWidget(
+                              radius: 28,
+                              path: snapshot.data![index].avatar,
+                            ),
+                            title: Text(snapshot.data![index].name),
+                            subtitle: Text(snapshot.data![index].complaint),
+                            trailing: Icon(Icons.arrow_right),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PatientDetailScreen(
+                                    patient: snapshot.data![index],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text('${snapshot.error}');
+                  } else if (!snapshot.hasData) {
+                    return const Text(
+                        'Looks like nothing\' here. Click on the + button to create a new Log.');
+                  }
+                  // By default, show a loading spinner.
+                  return const CircularProgressIndicator();
+                });
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(

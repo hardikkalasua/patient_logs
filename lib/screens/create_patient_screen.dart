@@ -3,8 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:patient_logs/data/models.dart';
+import 'package:patient_logs/data/provider_models.dart';
 import 'package:patient_logs/data/repository.dart';
 import 'package:patient_logs/utils.dart';
+import 'package:provider/provider.dart';
 
 import '../components/avatar_widget.dart';
 
@@ -23,9 +25,8 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
   final _ageController = TextEditingController();
   final _contactController = TextEditingController();
   final _complaintController = TextEditingController();
-  final _notesController = TextEditingController();
 
-  File? _avatar;
+  String? _avatar;
   // Declare a variable to store the selected value
   String? _sex;
 
@@ -33,7 +34,7 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Patient'),
+        title: const Text('New Patient'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -54,13 +55,13 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
                       if (image != null) {
                         setState(() {
                           // Set the avatar image
-                          _avatar = File(image.path);
+                          _avatar = image.path;
                         });
                       }
                     },
                     child: AvatarWidget(
                       radius: 64,
-                      avatar: _avatar,
+                      path: _avatar,
                     ),
                   ),
                 ),
@@ -155,18 +156,7 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
                     },
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextFormField(
-                    controller: _notesController,
-                    decoration: const InputDecoration(
-                      labelText: 'Notes',
-                      border: OutlineInputBorder(),
-                    ),
-                    textCapitalization: TextCapitalization.sentences,
-                    maxLines: 5,
-                  ),
-                ),
+
                 Padding(
                   padding: const EdgeInsets.symmetric(
                       vertical: 16.0, horizontal: 8.0),
@@ -183,12 +173,11 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
 
                         if (_avatar != null) {
                           _avatarController.text = await saveImageAndReturnPath(
-                            file: _avatar!,
+                            file: File(_avatar!),
                             dirPath: 'avatars',
                           );
                         }
-
-                        await Repository.addPatient(Patient(
+                        final newPatient = Patient(
                             id: 0,
                             name: _nameController.text,
                             age: int.parse(_ageController.text),
@@ -196,8 +185,22 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
                             avatar: _avatarController.text,
                             contact: _contactController.text,
                             complaint: _complaintController.text,
-                            notes: _notesController.text,
-                            createdAt: DateTime.now()));
+                            notes: '',
+                            createdAt: DateTime.now());
+
+                        final newPatientId =
+                            await Repository.addPatient(newPatient);
+                        Provider.of<PatientListModel>(context, listen: false)
+                            .add(Patient(
+                                id: newPatientId,
+                                name: newPatient.name,
+                                age: newPatient.age,
+                                sex: newPatient.sex,
+                                avatar: newPatient.avatar,
+                                contact: newPatient.contact,
+                                complaint: newPatient.complaint,
+                                notes: newPatient.notes,
+                                createdAt: newPatient.createdAt));
                         Navigator.pop(context);
                       }
                     },

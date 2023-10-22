@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:patient_logs/components/avatar_widget.dart';
 import 'package:patient_logs/data/models.dart';
 import 'package:patient_logs/data/repository.dart';
 import 'package:patient_logs/screens/patient_photos_component.dart';
@@ -31,32 +32,40 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
       ),
       body: Column(
         children: [
-          ListTile(
-            leading: Container(
-              width: 60,
-              height: 60,
-              child: CircleAvatar(
-                backgroundImage: AssetImage(
-                  'assets/images/default_avatar.jpg',
-                ),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AvatarWidget(
+                    radius: 48.0,
+                    path: widget.patient.avatar,
+                  ),
+                  Flexible(
+                    child: ListTile(
+                      title: Text(widget.patient.name),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.man,
+                                color: Colors.blue,
+                              ),
+                              Text(widget.patient.age.toString()),
+                            ],
+                          ),
+                          Text(widget.patient.contact.toString()),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            title: Text(widget.patient.name),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("${widget.patient.sex}, ${widget.patient.age}"),
-                Text(widget.patient.contact.toString()),
-              ],
-            ),
-            trailing: IconButton(
-              icon: Icon(Icons.edit),
-              onPressed: () {},
-            ),
-            isThreeLine: true,
           ),
-          Text('Complaint : ${widget.patient.complaint}'),
-          Text('Notes : ${widget.patient.notes}'),
           Expanded(
             child: PatientPhotosComponent(
               patientId: widget.patient.id,

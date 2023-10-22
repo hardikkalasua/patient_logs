@@ -3,13 +3,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 class AvatarWidget extends StatelessWidget {
-  final File? avatar;
+  final String? path;
   final double radius;
-  const AvatarWidget({super.key, this.avatar, required this.radius});
+  const AvatarWidget({super.key, this.path, required this.radius});
 
   @override
   Widget build(BuildContext context) {
-    if (avatar == null) {
+    if (path == null || path == '') {
       return CircleAvatar(
         radius: radius,
         backgroundImage: const AssetImage('assets/images/default_avatar.jpg'),
@@ -17,7 +17,7 @@ class AvatarWidget extends StatelessWidget {
     } else {
       return CircleAvatar(
         radius: radius,
-        backgroundImage: FileImage(avatar!),
+        backgroundImage: FileImage(File(path!)),
       );
     }
   }
