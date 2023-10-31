@@ -7,6 +7,7 @@ import 'package:patient_logs/data/repository.dart';
 import 'package:patient_logs/screens/patient_detail_screen.dart';
 import 'dart:async';
 import 'package:patient_logs/data/models.dart';
+import 'package:patient_logs/screens/patient_detail_screen2.dart';
 import 'package:provider/provider.dart';
 
 import 'create_patient_screen.dart';
@@ -65,7 +66,7 @@ class _PatientListScreenState extends State<PatientListScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => PatientDetailScreen(
+                                  builder: (context) => PatientDetailScreen2(
                                     patient: snapshot.data![index],
                                   ),
                                 ),
